@@ -8,22 +8,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a2d9b6e83a.js" crossorigin="anonymous"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #111827; color: #f9fafb; }
-    .card { background-color: #1f2937; border: 1px solid rgba(245,158,11,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #111827; 
+      color: #f9fafb; 
+    }
+    .card { 
+      background-color: #1f2937; 
+      border: 1px solid rgba(245,158,11,0.2); 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+    }
   </style>
 </head>
 <body class="p-6">
 
-  <h1 class="text-3xl font-bold mb-6 text-center text-yellow-400"><i class="fas fa-lock"></i> Painel Administrativo</h1>
+  <h1 class="text-3xl font-bold mb-6 text-center text-yellow-400">
+    <i class="fas fa-lock"></i> Painel Administrativo
+  </h1>
 
+  <!-- LOGIN -->
   <div id="login" class="max-w-md mx-auto card p-6 rounded-xl mb-8">
     <h2 class="text-xl font-semibold mb-4">Login</h2>
-    <input type="password" id="senha" placeholder="Senha do administrador"
-      class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 mb-4 text-gray-200">
-    <button id="entrar" class="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold rounded-lg">Entrar</button>
+    <input 
+      type="password" 
+      id="senha" 
+      placeholder="Senha do administrador"
+      class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 mb-4 text-gray-200"
+    >
+    <button 
+      id="entrar" 
+      class="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold rounded-lg"
+    >Entrar</button>
     <p id="erro" class="text-red-400 mt-3 hidden">Senha incorreta!</p>
   </div>
 
+  <!-- PAINEL -->
   <div id="painel" class="hidden">
     <div class="card p-6 rounded-xl">
       <h2 class="text-2xl font-semibold border-b border-gray-600 pb-3 mb-4">Avaliações Recebidas</h2>
@@ -32,14 +51,15 @@
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "123";
-    const SHEET_ID = "1E3-KMi4Z8UMDaLLUSYxZnG6YuPwCtclfpJLU4vxC4OE";
-    const SHEET_NAME = "Página1";
+    const ADMIN_PASSWORD = "123"; // altere se quiser
+    const SHEET_ID = "1E3-KMi4Z8UMDaLLUSYxZnG6YuPwCtclfpJLU4vxC4OE"; // seu ID da planilha
+    const SHEET_NAME = "Página1"; // nome da aba
 
     const loginDiv = document.getElementById("login");
     const painelDiv = document.getElementById("painel");
     const avaliacoesDiv = document.getElementById("avaliacoes");
 
+    // --- LOGIN ---
     document.getElementById("entrar").onclick = () => {
       const senha = document.getElementById("senha").value;
       if (senha === ADMIN_PASSWORD) {
@@ -52,35 +72,37 @@
       }
     };
 
+    // --- CARREGAR AVALIAÇÕES ---
     async function carregarAvaliacoes() {
       const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
       const res = await fetch(url);
       const data = await res.json();
 
       avaliacoesDiv.innerHTML = "";
+
       if (data.length === 0) {
         avaliacoesDiv.innerHTML = `<p class="text-gray-400 text-center">Nenhuma avaliação ainda.</p>`;
         return;
       }
 
-    data.reverse().forEach(av => {
-  // Tenta reconhecer os nomes das colunas mesmo se estiverem diferentes
-  const nome = av["nome"] || av["Nome"] || "Anônimo";
-  const nota = av["nota"] || av["Nota"] || av["estrelas"] || "0";
-  const comentario = av["comentario"] || av["Comentário"] || av["Feedback"] || "";
-  const dataCol = av["data"] || av["Data"] || av["Enviado em"] || "";
+      // Lê as colunas exatamente como estão na planilha: Nome | Nota | Comentário | Data
+      data.reverse().forEach(av => {
+        const nome = av["Nome"] || "Anônimo";
+        const nota = av["Nota"] || "0";
+        const comentario = av["Comentário"] || "";
+        const dataCol = av["Data"] || "";
 
-  avaliacoesDiv.innerHTML += `
-    <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-yellow-400 shadow-md">
-      <div class="flex justify-between mb-2">
-        <div>${"⭐".repeat(nota)}</div>
-      </div>
-      <p class="text-yellow-400 font-semibold">${nome}</p>
-      <p class="italic text-gray-300 mt-2">${comentario}</p>
-      <p class="text-xs text-gray-500 mt-2 border-t border-gray-600 pt-1">${dataCol}</p>
-    </div>
-  `;
-});
+        avaliacoesDiv.innerHTML += `
+          <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-yellow-400 shadow-md">
+            <div class="flex justify-between mb-2">
+              <div>${"⭐".repeat(Number(nota))}</div>
+            </div>
+            <p class="text-yellow-400 font-semibold">${nome}</p>
+            <p class="italic text-gray-300 mt-2">${comentario}</p>
+            <p class="text-xs text-gray-500 mt-2 border-t border-gray-600 pt-1">${dataCol}</p>
+          </div>
+        `;
+      });
     }
   </script>
 </body>

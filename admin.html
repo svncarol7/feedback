@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Avaliações</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2d9b6e83a.js" crossorigin="anonymous"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #111827; color: #f9fafb; }
+    .card { background-color: #1f2937; border: 1px solid rgba(245,158,11,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body class="p-6">
+
+  <h1 class="text-3xl font-bold mb-6 text-center text-yellow-400"><i class="fas fa-lock"></i> Painel Administrativo</h1>
+
+  <div id="login" class="max-w-md mx-auto card p-6 rounded-xl mb-8">
+    <h2 class="text-xl font-semibold mb-4">Login</h2>
+    <input type="password" id="senha" placeholder="Senha do administrador"
+      class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 mb-4 text-gray-200">
+    <button id="entrar" class="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold rounded-lg">Entrar</button>
+    <p id="erro" class="text-red-400 mt-3 hidden">Senha incorreta!</p>
+  </div>
+
+  <div id="painel" class="hidden">
+    <div class="card p-6 rounded-xl">
+      <h2 class="text-2xl font-semibold border-b border-gray-600 pb-3 mb-4">Avaliações Recebidas</h2>
+      <div id="avaliacoes" class="space-y-6 max-h-[70vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "12345admin";
+    const SHEET_ID = "1A2bC3D4EfG5h6I7J8K9L0MnOpxyz";
+    const SHEET_NAME = "Página1";
+
+    const loginDiv = document.getElementById("login");
+    const painelDiv = document.getElementById("painel");
+    const avaliacoesDiv = document.getElementById("avaliacoes");
+
+    document.getElementById("entrar").onclick = () => {
+      const senha = document.getElementById("senha").value;
+      if (senha === ADMIN_PASSWORD) {
+        loginDiv.classList.add("hidden");
+        painelDiv.classList.remove("hidden");
+        carregarAvaliacoes();
+      } else {
+        document.getElementById("erro").classList.remove("hidden");
+        setTimeout(() => document.getElementById("erro").classList.add("hidden"), 3000);
+      }
+    };
+
+    async function carregarAvaliacoes() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      avaliacoesDiv.innerHTML = "";
+      if (data.length === 0) {
+        avaliacoesDiv.innerHTML = `<p class="text-gray-400 text-center">Nenhuma avaliação ainda.</p>`;
+        return;
+      }
+
+      data.reverse().forEach(av => {
+        avaliacoesDiv.innerHTML += `
+          <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-yellow-400 shadow-md">
+            <div class="flex justify-between mb-2">
+              <div>${"⭐".repeat(av.Nota || 0)}</div>
+            </div>
+            <p class="text-yellow-400 font-semibold">${av.Nome || "Anônimo"}</p>
+            <p class="italic text-gray-300 mt-2">${av.Comentário || ""}</p>
+            <p class="text-xs text-gray-500 mt-2 border-t border-gray-600 pt-1">${av.Data || ""}</p>
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>

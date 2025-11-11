@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avaliação de Serviço Exclusivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1f2937;
+      color: #f3f4f6;
+    }
+    .card {
+      background-color: #374151;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .star-filled { color: #f59e0b; }
+    .submit-btn {
+      background-color: #f59e0b;
+      transition: transform 0.1s;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(245,158,11,0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+  <header class="w-full max-w-3xl text-center mb-10">
+    <h1 class="text-4xl font-extrabold text-white">
+      <i class="fas fa-gem text-yellow-400"></i> Experiência de Serviço
+    </h1>
+    <p class="text-gray-400 mt-3">Sua opinião nos ajuda a brilhar ainda mais 💎</p>
+  </header>
+
+  <main class="w-full max-w-3xl card p-8 rounded-2xl">
+    <form id="avaliacaoForm" class="space-y-6">
+      <div>
+        <label class="block text-lg mb-2">Seu nome:</label>
+        <input id="nome" type="text" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600" required>
+      </div>
+
+      <div>
+        <label class="block text-lg mb-2">Nota:</label>
+        <div id="stars" class="flex space-x-2 text-3xl cursor-pointer"></div>
+        <input type="hidden" id="nota" value="0" required>
+      </div>
+
+      <div>
+        <label class="block text-lg mb-2">Comentário:</label>
+        <textarea id="comentario" rows="4" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600" required></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn w-full py-3 rounded-xl font-bold text-gray-900">Enviar Avaliação</button>
+    </form>
+
+    <p id="mensagem" class="text-center mt-4 hidden"></p>
+  </main>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwRoPaR-qZix9UJ80Wjasc0is4O_CNW9aF-JN5GL5FZ-MrhK0I1-UxcXR1NFw7NLz1E/exec";
+
+    const starsContainer = document.getElementById("stars");
+    const ratingInput = document.getElementById("nota");
+
+    function renderStars(rating = 0) {
+      starsContainer.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement("i");
+        star.className = `fa-star ${i <= rating ? "fas text-yellow-400" : "far text-gray-500"}`;
+        star.onclick = () => renderStars(i);
+        starsContainer.appendChild(star);
+      }
+      ratingInput.value = rating;
+    }
+
+    renderStars();
+
+    document.getElementById("avaliacaoForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("nome").value;
+      const nota = document.getElementById("nota").value;
+      const comentario = document.getElementById("comentario").value;
+      const mensagem = document.getElementById("mensagem");
+
+      mensagem.classList.remove("hidden");
+      mensagem.textContent = "Enviando...";
+      mensagem.className = "text-yellow-400 text-center mt-4";
+
+      try {
+        await fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify({ nome, nota, comentario }),
+        });
+        mensagem.textContent = "Avaliação enviada com sucesso! 💛";
+        mensagem.className = "text-green-400 text-center mt-4";
+        document.getElementById("avaliacaoForm").reset();
+        renderStars(0);
+      } catch (err) {
+        mensagem.textContent = "Erro ao enviar. Tente novamente.";
+        mensagem.className = "text-red-400 text-center mt-4";
+      }
+    });
+  </script>
+
+</body>
+</html>

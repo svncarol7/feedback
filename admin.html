@@ -63,18 +63,24 @@
         return;
       }
 
-      data.reverse().forEach(av => {
-        avaliacoesDiv.innerHTML += `
-          <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-yellow-400 shadow-md">
-            <div class="flex justify-between mb-2">
-              <div>${"⭐".repeat(av.Nota || 0)}</div>
-            </div>
-            <p class="text-yellow-400 font-semibold">${av.Nome || "Anônimo"}</p>
-            <p class="italic text-gray-300 mt-2">${av.Comentário || ""}</p>
-            <p class="text-xs text-gray-500 mt-2 border-t border-gray-600 pt-1">${av.Data || ""}</p>
-          </div>
-        `;
-      });
+    data.reverse().forEach(av => {
+  // Tenta reconhecer os nomes das colunas mesmo se estiverem diferentes
+  const nome = av["nome"] || av["Nome"] || "Anônimo";
+  const nota = av["nota"] || av["Nota"] || av["estrelas"] || "0";
+  const comentario = av["comentario"] || av["Comentário"] || av["Feedback"] || "";
+  const dataCol = av["data"] || av["Data"] || av["Enviado em"] || "";
+
+  avaliacoesDiv.innerHTML += `
+    <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-yellow-400 shadow-md">
+      <div class="flex justify-between mb-2">
+        <div>${"⭐".repeat(nota)}</div>
+      </div>
+      <p class="text-yellow-400 font-semibold">${nome}</p>
+      <p class="italic text-gray-300 mt-2">${comentario}</p>
+      <p class="text-xs text-gray-500 mt-2 border-t border-gray-600 pt-1">${dataCol}</p>
+    </div>
+  `;
+});
     }
   </script>
 </body>

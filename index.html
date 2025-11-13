@@ -25,9 +25,16 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
       transition: transform 0.3s;
     }
-    .card:hover { transform: translateY(-3px); }
-    .star { transition: transform 0.15s, color 0.15s; }
-    .star:hover { transform: scale(1.2); color: #fbbf24 !important; }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    .star {
+      transition: transform 0.15s, color 0.15s;
+    }
+    .star:hover {
+      transform: scale(1.2);
+      color: #fbbf24 !important;
+    }
     .submit-btn {
       background: linear-gradient(90deg, #fbbf24, #f59e0b);
       transition: all 0.2s ease;
@@ -71,19 +78,13 @@
     <p id="mensagem" class="text-center mt-4 hidden transition-all duration-500"></p>
   </main>
 
-
   <script>
-    // 🔗 URLs do Google Apps Script e da planilha (já com seu ID)
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwxt6TgkcpHqG8fqhkblwRYyaDhRzCtgL-UU8kG8a8WaLQDjw1NURByQPb6Pr-6DHDZ/exec";
-    const sheetURL = "https://opensheet.elk.sh/1E3-KMi4Z8UMDaLLUSYxZnG6YuPwCtclfpJLU4vxC4OE/Respostas"; // ✅ Sua planilha real
-
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwFhhBrhYxZ9s3npBC6YIjkvjvwuiwyjzu2cowRk8wRfdxmJsHjTl1W0Ad6WGZlZqeH/exec";
     const starsContainer = document.getElementById("stars");
     const ratingInput = document.getElementById("nota");
     const mensagem = document.getElementById("mensagem");
     const enviarBtn = document.getElementById("enviarBtn");
-    const listaAvaliacoes = document.getElementById("listaAvaliacoes");
 
-    // ⭐ Sistema de estrelas
     function renderStars(rating = 0) {
       starsContainer.innerHTML = "";
       for (let i = 1; i <= 5; i++) {
@@ -94,9 +95,9 @@
       }
       ratingInput.value = rating;
     }
+
     renderStars();
 
-    // ✉️ Enviar avaliação
     document.getElementById("avaliacaoForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const nome = document.getElementById("nome").value.trim();
@@ -126,7 +127,6 @@
         mensagem.className = "text-green-400 text-center mt-4";
         e.target.reset();
         renderStars(0);
-        carregarAvaliacoes();
       } catch (err) {
         mensagem.textContent = "Erro ao enviar. Tente novamente.";
         mensagem.className = "text-red-400 text-center mt-4";
@@ -135,9 +135,7 @@
         enviarBtn.classList.remove("opacity-70");
       }
     });
-
-
-    carregarAvaliacoes();
   </script>
+
 </body>
 </html>

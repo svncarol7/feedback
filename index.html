@@ -5,108 +5,176 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Avaliação de Serviço Exclusivo</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #1f2937;
+      background: radial-gradient(circle at top, #1f2937 0%, #111827 100%);
       color: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
     }
     .card {
-      background-color: #374151;
+      background-color: #1f2937;
       border: 1px solid rgba(245, 158, 11, 0.3);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s;
     }
-    .star-filled { color: #f59e0b; }
+    .card:hover { transform: translateY(-3px); }
+    .star { transition: transform 0.15s, color 0.15s; }
+    .star:hover { transform: scale(1.2); color: #fbbf24 !important; }
     .submit-btn {
-      background-color: #f59e0b;
-      transition: transform 0.1s;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      transition: all 0.2s ease;
     }
     .submit-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(245,158,11,0.4);
+      box-shadow: 0 4px 15px rgba(245,158,11,0.4);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-6">
+<body>
 
-  <header class="w-full max-w-3xl text-center mb-10">
-    <h1 class="text-4xl font-extrabold text-white">
-      <i class="fas fa-gem text-yellow-400"></i> Experiência de Serviço
+  <header class="text-center mb-10">
+    <h1 class="text-4xl font-extrabold text-yellow-400 flex items-center justify-center gap-2">
+      <i class="fas fa-crown text-yellow-500"></i> Avaliação Premium
     </h1>
-    <p class="text-gray-400 mt-3">Sua opinião nos ajuda a brilhar ainda mais 💎</p>
+    <p class="text-gray-400 mt-2">Sua opinião é o que mantém nosso padrão de excelência ✨</p>
   </header>
 
-  <main class="w-full max-w-3xl card p-8 rounded-2xl">
+  <main class="w-full max-w-2xl card p-8 rounded-2xl">
     <form id="avaliacaoForm" class="space-y-6">
       <div>
-        <label class="block text-lg mb-2">Seu nome:</label>
-        <input id="nome" type="text" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600" required>
+        <label class="block text-lg mb-2 font-medium">Seu nome:</label>
+        <input id="nome" type="text" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-yellow-500" required>
       </div>
 
       <div>
-        <label class="block text-lg mb-2">Nota:</label>
-        <div id="stars" class="flex space-x-2 text-3xl cursor-pointer"></div>
+        <label class="block text-lg mb-2 font-medium">Sua nota:</label>
+        <div id="stars" class="flex space-x-2 text-3xl cursor-pointer justify-center"></div>
         <input type="hidden" id="nota" value="0" required>
       </div>
 
       <div>
-        <label class="block text-lg mb-2">Comentário:</label>
-        <textarea id="comentario" rows="4" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600" required></textarea>
+        <label class="block text-lg mb-2 font-medium">Comentário:</label>
+        <textarea id="comentario" rows="4" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-yellow-500 resize-none" required></textarea>
       </div>
 
-      <button type="submit" class="submit-btn w-full py-3 rounded-xl font-bold text-gray-900">Enviar Avaliação</button>
+      <button id="enviarBtn" type="submit" class="submit-btn w-full py-3 rounded-xl font-bold text-gray-900">Enviar Avaliação</button>
     </form>
 
-    <p id="mensagem" class="text-center mt-4 hidden"></p>
+    <p id="mensagem" class="text-center mt-4 hidden transition-all duration-500"></p>
   </main>
 
+  <!-- 🟡 SEÇÃO DE AVALIAÇÕES EXIBIDAS -->
+  <section id="avaliacoes" class="w-full max-w-3xl mt-10">
+    <h2 class="text-2xl font-bold text-center text-yellow-400 mb-4">Avaliações Recentes</h2>
+    <div id="listaAvaliacoes" class="space-y-4"></div>
+  </section>
+
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwRoPaR-qZix9UJ80Wjasc0is4O_CNW9aF-JN5GL5FZ-MrhK0I1-UxcXR1NFw7NLz1E/exec";
+    // 🔗 URLs do Google Apps Script e da planilha (já com seu ID)
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwxt6TgkcpHqG8fqhkblwRYyaDhRzCtgL-UU8kG8a8WaLQDjw1NURByQPb6Pr-6DHDZ/exec";
+    const sheetURL = "https://opensheet.elk.sh/1E3-KMi4Z8UMDaLLUSYxZnG6YuPwCtclfpJLU4vxC4OE/Respostas"; // ✅ Sua planilha real
 
     const starsContainer = document.getElementById("stars");
     const ratingInput = document.getElementById("nota");
+    const mensagem = document.getElementById("mensagem");
+    const enviarBtn = document.getElementById("enviarBtn");
+    const listaAvaliacoes = document.getElementById("listaAvaliacoes");
 
+    // ⭐ Sistema de estrelas
     function renderStars(rating = 0) {
       starsContainer.innerHTML = "";
       for (let i = 1; i <= 5; i++) {
         const star = document.createElement("i");
-        star.className = `fa-star ${i <= rating ? "fas text-yellow-400" : "far text-gray-500"}`;
+        star.className = `fa-star star ${i <= rating ? "fas text-yellow-400" : "far text-gray-600"}`;
         star.onclick = () => renderStars(i);
         starsContainer.appendChild(star);
       }
       ratingInput.value = rating;
     }
-
     renderStars();
 
+    // ✉️ Enviar avaliação
     document.getElementById("avaliacaoForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const nome = document.getElementById("nome").value;
+      const nome = document.getElementById("nome").value.trim();
       const nota = document.getElementById("nota").value;
-      const comentario = document.getElementById("comentario").value;
-      const mensagem = document.getElementById("mensagem");
+      const comentario = document.getElementById("comentario").value.trim();
+      const data = new Date().toLocaleDateString("pt-BR");
 
+      if (nota === "0") {
+        mensagem.textContent = "Por favor, selecione uma nota antes de enviar ⭐";
+        mensagem.className = "text-red-400 text-center mt-4";
+        mensagem.classList.remove("hidden");
+        return;
+      }
+
+      enviarBtn.disabled = true;
+      enviarBtn.classList.add("opacity-70");
       mensagem.classList.remove("hidden");
-      mensagem.textContent = "Enviando...";
+      mensagem.textContent = "Enviando sua avaliação...";
       mensagem.className = "text-yellow-400 text-center mt-4";
 
       try {
         await fetch(scriptURL, {
           method: "POST",
-          body: JSON.stringify({ nome, nota, comentario }),
+          body: JSON.stringify({ nome, nota, comentario, data }),
         });
         mensagem.textContent = "Avaliação enviada com sucesso! 💛";
         mensagem.className = "text-green-400 text-center mt-4";
-        document.getElementById("avaliacaoForm").reset();
+        e.target.reset();
         renderStars(0);
+        carregarAvaliacoes();
       } catch (err) {
         mensagem.textContent = "Erro ao enviar. Tente novamente.";
         mensagem.className = "text-red-400 text-center mt-4";
+      } finally {
+        enviarBtn.disabled = false;
+        enviarBtn.classList.remove("opacity-70");
       }
     });
-  </script>
 
+    // 📄 Carregar avaliações automaticamente do Google Sheets
+    async function carregarAvaliacoes() {
+      listaAvaliacoes.innerHTML = "<p class='text-center text-gray-400'>Carregando avaliações...</p>";
+      try {
+        const res = await fetch(sheetURL);
+        const dados = await res.json();
+        listaAvaliacoes.innerHTML = "";
+
+        if (dados.length === 0) {
+          listaAvaliacoes.innerHTML = "<p class='text-center text-gray-400'>Nenhuma avaliação ainda.</p>";
+          return;
+        }
+
+        dados.reverse().forEach(av => {
+          const item = document.createElement("div");
+          item.className = "card p-4 rounded-xl border border-gray-700";
+
+          const estrelas = "⭐".repeat(av.nota || 0);
+          item.innerHTML = `
+            <div class="flex justify-between mb-1">
+              <p class="text-yellow-400 font-bold">${av.nome || "Anônimo"}</p>
+              <span class="text-xs text-gray-500">${av.data || ""}</span>
+            </div>
+            <p class="text-yellow-500 text-lg mt-1">${estrelas}</p>
+            <p class="mt-2 text-gray-300">${av.comentario || ""}</p>
+          `;
+          listaAvaliacoes.appendChild(item);
+        });
+      } catch (error) {
+        listaAvaliacoes.innerHTML = "<p class='text-center text-red-400'>Erro ao carregar avaliações 😔</p>";
+      }
+    }
+
+    carregarAvaliacoes();
+  </script>
 </body>
 </html>
